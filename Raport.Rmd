@@ -1,11 +1,49 @@
 ---
 title: "Raport"
 author: "127310"
-output: html_document
+output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+```{r, echo=FALSE}
+library(ggplot2)
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
 ```
 
 ## R Markdown
@@ -27,3 +65,35 @@ plot(pressure)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Biblioteki:
+```{r, echo=FALSE}
+(.packages())
+```
+Wczytanie danych
+```{r, echo=FALSE}
+sledzie <- read.csv("sledzie.csv",header=TRUE)
+```
+Podsumowanie:
+```{r, echo=FALSE}
+summary(sledzie)
+```
+```{r, echo=FALSE}
+p1 <- ggplot(sledzie,aes(x=length)) + geom_histogram(color="darkblue",fill="lightblue")
+p2 <- ggplot(sledzie,aes(x=cfin1)) + geom_histogram(color="darkblue",fill="lightblue")
+p3 <- ggplot(sledzie,aes(x=cfin2)) + geom_histogram(color="darkblue",fill="lightblue")
+p4 <- ggplot(sledzie,aes(x=chel1)) + geom_histogram(color="darkblue",fill="lightblue")
+p5 <- ggplot(sledzie,aes(x=chel2)) + geom_histogram(color="darkblue",fill="lightblue")
+p6 <- ggplot(sledzie,aes(x=lcop1)) + geom_histogram(color="darkblue",fill="lightblue")
+p7 <- ggplot(sledzie,aes(x=lcop2)) + geom_histogram(color="darkblue",fill="lightblue")
+p8 <- ggplot(sledzie,aes(x=fbar)) + geom_histogram(color="darkblue",fill="lightblue")
+p9 <- ggplot(sledzie,aes(x=recr)) + geom_histogram(color="darkblue",fill="lightblue")
+p10 <- ggplot(sledzie,aes(x=cumf)) + geom_histogram(color="darkblue",fill="lightblue")
+p11 <- ggplot(sledzie,aes(x=totaln)) + geom_histogram(color="darkblue",fill="lightblue")
+p12 <- ggplot(sledzie,aes(x=sst)) + geom_histogram(color="darkblue",fill="lightblue")
+p13 <- ggplot(sledzie,aes(sal)) + geom_histogram(color="darkblue",fill="lightblue")
+p14 <- ggplot(sledzie,aes(x=xmonth)) + geom_histogram(color="darkblue",fill="lightblue")
+p15 <- ggplot(sledzie,aes(x=nao)) + geom_histogram(color="darkblue",fill="lightblue")
+multiplot(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,cols=5)
+```
+

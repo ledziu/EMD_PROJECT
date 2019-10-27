@@ -8,3 +8,4 @@ dataset <- load_dataset()
 
 
 head(dataset)
+sumarry(dataset)
