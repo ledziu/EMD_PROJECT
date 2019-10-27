@@ -1,11 +1,12 @@
 ---
-title: "Raport"
+title: "README"
 author: "127310"
 output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,  fig.path = "README_figs/README-"
+)
 ```
 ```{r, echo=FALSE}
 library(ggplot2)

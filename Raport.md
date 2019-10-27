@@ -1,4 +1,4 @@
-Raport
+README
 ================
 127310
 
@@ -30,7 +30,7 @@ summary(cars)
 
 You can also embed plots, for example:
 
-![](Raport_files/figure-gfm/pressure-1.png)<!-- -->
+![](README_figs/README-pressure-1.png)<!-- -->
 
 Note that the `echo = FALSE` parameter was added to the code chunk to
 prevent printing of the R code that generated the plot.
@@ -107,4 +107,4 @@ Podsumowanie:
     
     ## Warning: Ignoring unknown parameters: binwidth, bins, pad
 
-![](Raport_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README_figs/README-unnamed-chunk-5-1.png)<!-- -->
