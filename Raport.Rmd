@@ -5,11 +5,15 @@ output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,  fig.path = "README_figs/README-"
-)
+knitr::opts_chunk$set(echo = TRUE)
 ```
-```{r, echo=FALSE}
+```{r}
+library(reshape2)
 library(ggplot2)
+```
+
+```{r, echo=FALSE}
+
 multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   library(grid)
 
@@ -47,38 +51,26 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 }
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
+1. Kod wyliczający wykorzystane biblioteki.
 Biblioteki:
 ```{r, echo=FALSE}
 (.packages())
 ```
-Wczytanie danych
-```{r, echo=FALSE}
-sledzie <- read.csv("sledzie.csv",header=TRUE)
+3.Kod pozwalający wczytać dane z pliku.
+4.Kod przetwarzający brakujące dane.
+Wczytanie danych i oczyszczanie ich
+```{r}
+sledzie <- read.csv("sledzie.csv",header=TRUE,na.strings = "?")
+sledzie_no_na <- na.omit(sledzie)
 ```
+5.Sekcję podsumowującą rozmiar zbioru i podstawowe statystyki.
 Podsumowanie:
 ```{r, echo=FALSE}
 summary(sledzie)
 ```
+6.Szczegółową analizę wartości atrybutów (np. poprzez prezentację rozkładów wartości).
 ```{r, echo=FALSE}
 p1 <- ggplot(sledzie,aes(x=length)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
 p2 <- ggplot(sledzie,aes(x=cfin1)) + geom_histogram(color="darkblue",fill="lightblue",stat="count") 
@@ -95,6 +87,12 @@ p12 <- ggplot(sledzie,aes(x=sst)) + geom_histogram(color="darkblue",fill="lightb
 p13 <- ggplot(sledzie,aes(sal)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
 p14 <- ggplot(sledzie,aes(x=xmonth)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
 p15 <- ggplot(sledzie,aes(x=nao)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-multiplot(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,cols=5)
+multiplot(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,cols=3)
 ```
+7.Sekcję sprawdzającą korelacje między zmiennymi; sekcja ta powinna zawierać jakąś formę graficznej prezentacji korelacji.
 
+8.Interaktywny wykres lub animację prezentującą zmianę rozmiaru śledzi w czasie.
+
+9.Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
+
+10.Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
