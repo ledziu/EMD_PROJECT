@@ -27,6 +27,7 @@ library(plotly)
 library(corrplot)
 library(shiny)
 library(reshape)
+library(randomForest)
 library(caret)
 
 ```
@@ -77,8 +78,13 @@ kable(uniq, caption = "Unikalne wartości")
 # Rozkład wartości atrybutów 
 ```{r, warning=FALSE}
 boxplot(df_no_na$length, horizontal = TRUE, main="Długość złowionego śledzia [cm]")
-boxplot(df_no_na[,3:8], main="Dostępność planktonu", 
-        names=c("cfin1","cfin2","chel1","chel2","lcop1","lcop2"))
+boxplot(df_no_na[,3:4], main="Dostępność planktonu", 
+        names=c("cfin1","cfin2"))
+boxplot(df_no_na[,5:6], main="Dostępność planktonu", 
+        names=c("chel1","chel2"))
+boxplot(df_no_na[,7:8], main="Dostępność planktonu", 
+        names=c("lcop1","lcop2"))
+
 boxplot(df_no_na$fbar, horizontal=TRUE, main="Natężenie połowów w regionie")
 boxplot(df_no_na$recr, horizontal=TRUE, main="Roczny narybek")
 boxplot(df_no_na$cumf, horizontal=TRUE, main="Łączne roczne natężenie połowów w regionie")
@@ -147,15 +153,18 @@ ctrl <- trainControl(
 ```{r}
 afterFeatureSelection <- df_no_na %>% select(length, cfin1, cfin2, chel1, chel2, lcop1, lcop2, fbar, recr, cumf, totaln, sst, sal, nao)
 
-inTraining <- createDataPartition(y=afterFeatureSelection$length,p=.8,list = F)
-training <- afterFeatureSelection[inTraining]
-testing <- afterFeatureSelection[-inTraining]
+inTraining <- createDataPartition(y=afterFeatureSelection$length,p=0.8,list = F)
+training <- afterFeatureSelection[inTraining,]
+testing <- afterFeatureSelection[-inTraining,]
+X_train = select(training, -length)
+y_train = training$length
+X_test = select(testing, -length)
+y_test = testing$length
 ```
 COS O MODELU
 ```{r}
-fit <- train(length ~ .,
-             data = train,
-             method = 'rf',
+fit <- train(X_train,y_train,
+            method = 'rf',
              trControl = ctrl,
              metric = "RMSE",
              tuneGrid=rfGrid,
@@ -164,6 +173,17 @@ fit <- train(length ~ .,
 ggplot(fit) + ggtitle("Optymalizacja parametru mtry na podstawie miary RMSE") + theme_bw()
 
 ```
+```{r}
+predictions <- predict(fit, newdata = X_test)
+modelValues <- data.frame(obs = y_test, pred = predictions)
+```
+Model regresyjny został poddany testom na danych testowych. Osiągnięto wynik w postaci miar RMSE i Rsquared:
+`r kable(defaultSummary(modelValues))`
+```{r}
+importance <- varImp(fit, scale = FALSE)
+ggplot(importance)
+```
+
 
 
 10.Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
