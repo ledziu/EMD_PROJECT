@@ -31,23 +31,25 @@ library(caret)
 
 ```
 
-# Wczytanie danych i oczyszczanie ich
-```{r}
+# Wczytanie danych
+
+```{r, echo=FALSE}
 df <- read.csv("sledzie.csv",header=TRUE,colClasses = c("integer","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","integer","numeric"),na.strings = "?")
 
 df <- data.frame(df)
 df_no_na <- na.omit(df)
 raw_df <- df
-for (i in 1:ncol(df)){df[is.na(df[,i]),i] <- mean(df[,i],na.rm = T)}
+
 nrows <- nrow(df)
 ncols <- ncol(df)
 complete_rows <- sum(complete.cases(raw_df))
 n_na_rows <- nrows - complete_rows
 ```
-# Analiza zbioru:
-Zbiór danych zawiera `r ncols` atrybutów opisujących `r nrows` obserwacji. W zbiorze znajdują się `r n_na_rows` niekompletnych obserwacji.
+Zbiór pochodzi z pliku "sledzie.csv",zwaiera`r ncols` atrybutów opisujących `r nrows` obserwacji. W zbiorze znajdują się `r n_na_rows` niekompletnych obserwacji. Wartości puste w zbiorze reprezentowane sa za pomocą '?', a część dziesiętna liczb oddzielona jest kropką. Zbiór posiada nagłówek opisujący nazwy atrybutów.  By dane zostały wczytane poprawnie, do funcji read.csv przekazano takie argumenty jak: nazwa pliku, forma reprezentacji wartości pustych, że zbiór zawiera nagłówek oraz listę prezentującą klasy danych atrybutów.
 
-Atrybuty w zbiorze danych: \
+# Analiza zbioru:
+Zbiór danych zawiera `r ncols` atrybutów: \ 
+
 length - długość złowionego śledzia [cm] \
 cfin1  - dostępność planktonu [zagęszczenie Calanus finmarchicus gat. 1] \
 cfin2  - dostępność planktonu [zagęszczenie Calanus finmarchicus gat. 2] \
@@ -64,17 +66,19 @@ sal    - poziom zasolenia wody [Knudsen ppt] \
 xmonth - miesiąc połowu [numer miesiąca] \
 nao    - oscylacja północnoatlantycka [mb] \
 
-```{r}
+Kolejne wiersze reprezentują kolejne obserwacje i są ułożone hronologicznie. 
+
+```{r,warning=FALSE}
 kable(summary(raw_df), caption = "Podsumowanie zbioru danych")
 
 uniq <- raw_df %>% summarise_each(funs(n_distinct(., na.rm = TRUE)))
 kable(uniq, caption = "Unikalne wartości")
 ```
 # Rozkład wartości atrybutów 
-```{r}
+```{r, warning=FALSE}
 boxplot(df_no_na$length, horizontal = TRUE, main="Długość złowionego śledzia [cm]")
 boxplot(df_no_na[,3:8], main="Dostępność planktonu", 
-        names=c("Calanus finmarchicus", "Calanus finmarchicus", "Calanus helgolandicus", "Calanus helgolandicus", "widłonogi", "widłonogi"))
+        names=c("cfin1","cfin2","chel1","chel2","lcop1","lcop2"))
 boxplot(df_no_na$fbar, horizontal=TRUE, main="Natężenie połowów w regionie")
 boxplot(df_no_na$recr, horizontal=TRUE, main="Roczny narybek")
 boxplot(df_no_na$cumf, horizontal=TRUE, main="Łączne roczne natężenie połowów w regionie")
@@ -93,27 +97,36 @@ nrows <- nrow(df)
 ncols <- ncol(df)
 complete_rows <- sum(complete.cases(raw_df))
 n_na_rows <- nrows - complete_rows
+prop <- 100 * n_na_rows / nrows
+```
+
+
+```{r, echo=T}
+for (i in 1:ncol(df)){df[is.na(df[,i]),i] <- mean(df[,i],na.rm = T)}
 ```
 Brakujące wartości występują tylko w 7 atrybutach: \
 - dostępność planktonu -> cfin1, cfin2, chel1, chel2, lcop1, lcop2, \
 - temperatura przy powierzchni wody -> sst. \
-
-
-
+Łącznie niepełnych obserwacji mamy: `r n_na_rows`, czyli jest to `r prop` % całego zbiioru. Usunięcie takiej ilości obserwacji ze względu na braki w jednej cesze może być dużo bardziej szkodliwe niż podmienienie ich na wartości średnie lub mediane danej cechy.
+Można by spróbować, ze względu na chronologiczne ułożenie danych, obliczać średnią z wartości poprzedzającej wartość pustą oraz następującej po wartości pustej, jednak to może spowodować duże przekłamanie w danych. Średnia jest bezpieczniejszym rozwiązaniem, która nie psuje tak mocno rozkładu danych.
 
 
 # Korelacja między atrybutami
 ```{r}
-correlation <- cor(df)
+correlation <- cor(df_no_na)
 corrplot(correlation,type="upper",tl.col = "black", tl.srt = 45)
 ```
+Największą korelację można zaobserwować między parami: `chel1` - `loop1` ,`chel2` - `loop2`,  `fbar` - `cumf`, `cfin2` - `lcop2` oraz `cumf` - `totaln`.
+W stosunku do atrybutu 'length' najwyższą korelacje można zaobserwować z  `sst`, `nao`.
+Nao jest to Oscylacja Północnoatlantycka, która jest zjawiskiem meteorologicznym. Występuje w obszarze północnego atlantyku i ma wpływ na klimat otaczających go kontynentów. Jej działalność związana jest z cyrkulacją powietrza i wody, co by tłumaczyło zależność długości śledzia od tych dwóch atrybutów na raz. 
+`length` jest także skorelowany z intensywnościa połowów oraz dostępnością planktonu (chel1 - Calanus helgolandicus gat. 1 i lcop1 - widłonogów  gat. 1).
 
 
 
 # Zmiana rozmiaru śledzia w czasie
 ```{r}
-partition <- createDataPartition(y=raw_df$length, p=.05, list=FALSE)
-dfPartition <- raw_df[partition, ]
+partition <- createDataPartition(y=df_no_na$length, p=.05, list=FALSE)
+dfPartition <- df_no_na[partition, ]
 p <- ggplot(dfPartition, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw()
 ggplotly(p)
 ```
@@ -121,11 +134,36 @@ ggplotly(p)
 # Regresor 
 Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
 
-Dane zostały podzielone na 2 zbiory: zbiór treningowy - zawierający 80 % danych, oraz zbiór testowy - zawierający 20 % danych.
-```{r}
-inTraining <- createDataPartition(y=df$length,p=.8,list = F)
-training <- df[inTraining]
-testing <- df[-inTraining]
+Dane zostały podzielone na 2 zbiory: zbiór treningowy - zawierający 80 % danych, oraz zbiór testowy - zawierający 20 % 
+```{r,echo=FALSE,warning=FALSE}
+set.seed(69)
+rfGrid <- expand.grid(mtry = 1:6)
+ctrl <- trainControl(
+    method = "repeatedcv",
+    number = 5,
+    repeats = 2)
 ```
+
+```{r}
+afterFeatureSelection <- df_no_na %>% select(length, cfin1, cfin2, chel1, chel2, lcop1, lcop2, fbar, recr, cumf, totaln, sst, sal, nao)
+
+inTraining <- createDataPartition(y=afterFeatureSelection$length,p=.8,list = F)
+training <- afterFeatureSelection[inTraining]
+testing <- afterFeatureSelection[-inTraining]
+```
+COS O MODELU
+```{r}
+fit <- train(length ~ .,
+             data = train,
+             method = 'rf',
+             trControl = ctrl,
+             metric = "RMSE",
+             tuneGrid=rfGrid,
+             importance = TRUE,
+             ntree=20)
+ggplot(fit) + ggtitle("Optymalizacja parametru mtry na podstawie miary RMSE") + theme_bw()
+
+```
+
 
 10.Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
