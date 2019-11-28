@@ -1,98 +1,131 @@
 ---
-title: "README"
+title: "Raport"
 author: "127310"
-output: rmarkdown::github_document
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output: 
+  html_document:
+    keep_md: yes
+    number_sections: yes
+    toc: yes
+    toc_float:
+      collapsed: yes
+      smooth_scroll: no
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-```{r}
+
+# Biblioteki:
+```{r, message=FALSE,warning=F}
 library(reshape2)
+library(dplyr)
+library(tidyr)
+library(knitr)
 library(ggplot2)
+library(plotly)
+library(corrplot)
+library(shiny)
+library(reshape)
+library(caret)
+
 ```
 
-```{r, echo=FALSE}
-
-multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
-  library(grid)
-
-  # Make a list from the ... arguments and plotlist
-  plots <- c(list(...), plotlist)
-
-  numPlots = length(plots)
-
-  # If layout is NULL, then use 'cols' to determine layout
-  if (is.null(layout)) {
-    # Make the panel
-    # ncol: Number of columns of plots
-    # nrow: Number of rows needed, calculated from # of cols
-    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
-                    ncol = cols, nrow = ceiling(numPlots/cols))
-  }
-
- if (numPlots==1) {
-    print(plots[[1]])
-
-  } else {
-    # Set up the page
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-
-    # Make each plot, in the correct location
-    for (i in 1:numPlots) {
-      # Get the i,j matrix positions of the regions that contain this subplot
-      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-
-      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-                                      layout.pos.col = matchidx$col))
-    }
-  }
-}
-```
-
-
-
-1. Kod wyliczający wykorzystane biblioteki.
-Biblioteki:
-```{r, echo=FALSE}
-(.packages())
-```
-3.Kod pozwalający wczytać dane z pliku.
-4.Kod przetwarzający brakujące dane.
-Wczytanie danych i oczyszczanie ich
+# Wczytanie danych i oczyszczanie ich
 ```{r}
-sledzie <- read.csv("sledzie.csv",header=TRUE,na.strings = "?")
-sledzie_no_na <- na.omit(sledzie)
-```
-5.Sekcję podsumowującą rozmiar zbioru i podstawowe statystyki.
-Podsumowanie:
-```{r, echo=FALSE}
-summary(sledzie)
-```
-6.Szczegółową analizę wartości atrybutów (np. poprzez prezentację rozkładów wartości).
-```{r, echo=FALSE}
-p1 <- ggplot(sledzie,aes(x=length)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p2 <- ggplot(sledzie,aes(x=cfin1)) + geom_histogram(color="darkblue",fill="lightblue",stat="count") 
-p3 <- ggplot(sledzie,aes(x=cfin2)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p4 <- ggplot(sledzie,aes(x=chel1)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p5 <- ggplot(sledzie,aes(x=chel2)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p6 <- ggplot(sledzie,aes(x=lcop1)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p7 <- ggplot(sledzie,aes(x=lcop2)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p8 <- ggplot(sledzie,aes(x=fbar)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p9 <- ggplot(sledzie,aes(x=recr)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p10 <- ggplot(sledzie,aes(x=cumf)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p11 <- ggplot(sledzie,aes(x=totaln)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p12 <- ggplot(sledzie,aes(x=sst)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p13 <- ggplot(sledzie,aes(sal)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p14 <- ggplot(sledzie,aes(x=xmonth)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-p15 <- ggplot(sledzie,aes(x=nao)) + geom_histogram(color="darkblue",fill="lightblue",stat="count")
-multiplot(p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,cols=3)
-```
-7.Sekcję sprawdzającą korelacje między zmiennymi; sekcja ta powinna zawierać jakąś formę graficznej prezentacji korelacji.
+df <- read.csv("sledzie.csv",header=TRUE,colClasses = c("integer","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","numeric","integer","numeric"),na.strings = "?")
 
-8.Interaktywny wykres lub animację prezentującą zmianę rozmiaru śledzi w czasie.
+df <- data.frame(df)
+df_no_na <- na.omit(df)
+raw_df <- df
+for (i in 1:ncol(df)){df[is.na(df[,i]),i] <- mean(df[,i],na.rm = T)}
+nrows <- nrow(df)
+ncols <- ncol(df)
+complete_rows <- sum(complete.cases(raw_df))
+n_na_rows <- nrows - complete_rows
+```
+# Analiza zbioru:
+Zbiór danych zawiera `r ncols` atrybutów opisujących `r nrows` obserwacji. W zbiorze znajdują się `r n_na_rows` niekompletnych obserwacji.
 
-9.Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
+Atrybuty w zbiorze danych: \
+length - długość złowionego śledzia [cm] \
+cfin1  - dostępność planktonu [zagęszczenie Calanus finmarchicus gat. 1] \
+cfin2  - dostępność planktonu [zagęszczenie Calanus finmarchicus gat. 2] \
+chel1  - dostępność planktonu [zagęszczenie Calanus helgolandicus gat. 1] \
+chel2  - dostępność planktonu [zagęszczenie Calanus helgolandicus gat. 2] \
+lcop1  - dostępność planktonu [zagęszczenie widłonogów  gat. 1] \
+lcop2  - dostępność planktonu [zagęszczenie widłonogów  gat. 2] \
+fbar   - natężenie połowów w regionie [ułamek pozostawionego narybku] \
+recr   - roczny narybek [liczba śledzi] \
+cumf   - łączne roczne natężenie połowów w regionie [ułamek pozostawionego narybku] \
+totaln - łączna liczba ryb złowionych w ramach połowu [liczba śledzi] \
+sst    - temperatura przy powierzchni wody [°C] \
+sal    - poziom zasolenia wody [Knudsen ppt] \
+xmonth - miesiąc połowu [numer miesiąca] \
+nao    - oscylacja północnoatlantycka [mb] \
+
+```{r}
+kable(summary(raw_df), caption = "Podsumowanie zbioru danych")
+
+uniq <- raw_df %>% summarise_each(funs(n_distinct(., na.rm = TRUE)))
+kable(uniq, caption = "Unikalne wartości")
+```
+# Rozkład wartości atrybutów 
+```{r}
+boxplot(df_no_na$length, horizontal = TRUE, main="Długość złowionego śledzia [cm]")
+boxplot(df_no_na[,3:8], main="Dostępność planktonu", 
+        names=c("Calanus finmarchicus", "Calanus finmarchicus", "Calanus helgolandicus", "Calanus helgolandicus", "widłonogi", "widłonogi"))
+boxplot(df_no_na$fbar, horizontal=TRUE, main="Natężenie połowów w regionie")
+boxplot(df_no_na$recr, horizontal=TRUE, main="Roczny narybek")
+boxplot(df_no_na$cumf, horizontal=TRUE, main="Łączne roczne natężenie połowów w regionie")
+boxplot(df_no_na$totaln, horizontal=TRUE, main="Łączna liczba ryb złowionych w ramach połowu")
+boxplot(df_no_na$sst, horizontal=TRUE, main="Temperatura przy powierzchni wody")
+boxplot(df_no_na$sal, horizontal=TRUE, main="Poziom zasolenia wody")
+boxplot(df_no_na$nao, horizontal=TRUE, main="Oscylacja północnoatlantycka")
+```
+
+
+
+
+# Analiza brakujących wartości.
+```{r, echo=FALSE}
+nrows <- nrow(df)
+ncols <- ncol(df)
+complete_rows <- sum(complete.cases(raw_df))
+n_na_rows <- nrows - complete_rows
+```
+Brakujące wartości występują tylko w 7 atrybutach: \
+- dostępność planktonu -> cfin1, cfin2, chel1, chel2, lcop1, lcop2, \
+- temperatura przy powierzchni wody -> sst. \
+
+
+
+
+
+# Korelacja między atrybutami
+```{r}
+correlation <- cor(df)
+corrplot(correlation,type="upper",tl.col = "black", tl.srt = 45)
+```
+
+
+
+# Zmiana rozmiaru śledzia w czasie
+```{r}
+partition <- createDataPartition(y=raw_df$length, p=.05, list=FALSE)
+dfPartition <- raw_df[partition, ]
+p <- ggplot(dfPartition, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw()
+ggplotly(p)
+```
+
+# Regresor 
+Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
+
+Dane zostały podzielone na 2 zbiory: zbiór treningowy - zawierający 80 % danych, oraz zbiór testowy - zawierający 20 % danych.
+```{r}
+inTraining <- createDataPartition(y=df$length,p=.8,list = F)
+training <- df[inTraining]
+testing <- df[-inTraining]
+```
 
 10.Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
