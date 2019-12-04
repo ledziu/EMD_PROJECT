@@ -48,7 +48,16 @@ n_na_rows <- nrows - complete_rows
 ```
 Zbiór pochodzi z pliku "sledzie.csv",zwaiera`r ncols` atrybutów opisujących `r nrows` obserwacji. W zbiorze znajdują się `r n_na_rows` niekompletnych obserwacji. Wartości puste w zbiorze reprezentowane sa za pomocą '?', a część dziesiętna liczb oddzielona jest kropką. Zbiór posiada nagłówek opisujący nazwy atrybutów.  By dane zostały wczytane poprawnie, do funcji read.csv przekazano takie argumenty jak: nazwa pliku, forma reprezentacji wartości pustych, że zbiór zawiera nagłówek oraz listę prezentującą klasy danych atrybutów.
 
+# Powtarzalność wyników
+W celu uzyskania powtarzalności wyników, ustawiono ziarno generatora na:
+```{r}
+set.seed(666)
+```
+
+
 # Analiza zbioru:
+Na przestrzeni ostatnich lat zauważono stopniowy spadek rozmiaru śledzia oceanicznego wyławianego w Europie. Do analizy zebrano pomiary śledzi i warunków w jakich żyją z ostatnich 60 lat. Dane były pobierane z połowów komercyjnych jednostek. W ramach połowu jednej jednostki losowo wybierano od 50 do 100 sztuk trzyletnich śledzi. Dane dostępne są pod adresem: http://www.cs.put.poznan.pl/alabijak/emd/projekt/sledzie.csv.
+
 Zbiór danych zawiera `r ncols` atrybutów: \ 
 
 length - długość złowionego śledzia [cm] \
@@ -75,24 +84,186 @@ kable(summary(raw_df), caption = "Podsumowanie zbioru danych")
 uniq <- raw_df %>% summarise_each(funs(n_distinct(., na.rm = TRUE)))
 kable(uniq, caption = "Unikalne wartości")
 ```
-# Rozkład wartości atrybutów 
-```{r, warning=FALSE}
-boxplot(df_no_na$length, horizontal = TRUE, main="Długość złowionego śledzia [cm]")
-boxplot(df_no_na[,3:4], main="Dostępność planktonu", 
-        names=c("cfin1","cfin2"))
-boxplot(df_no_na[,5:6], main="Dostępność planktonu", 
-        names=c("chel1","chel2"))
-boxplot(df_no_na[,7:8], main="Dostępność planktonu", 
-        names=c("lcop1","lcop2"))
 
-boxplot(df_no_na$fbar, horizontal=TRUE, main="Natężenie połowów w regionie")
-boxplot(df_no_na$recr, horizontal=TRUE, main="Roczny narybek")
-boxplot(df_no_na$cumf, horizontal=TRUE, main="Łączne roczne natężenie połowów w regionie")
-boxplot(df_no_na$totaln, horizontal=TRUE, main="Łączna liczba ryb złowionych w ramach połowu")
-boxplot(df_no_na$sst, horizontal=TRUE, main="Temperatura przy powierzchni wody")
-boxplot(df_no_na$sal, horizontal=TRUE, main="Poziom zasolenia wody")
-boxplot(df_no_na$nao, horizontal=TRUE, main="Oscylacja północnoatlantycka")
+## Długość śledzia  
+Długość śledzia jest wyrażona w cm.
+```{r,warning=FALSE}
+plot_length <- ggplot(df,aes(X,length))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_length <- plot_length + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Długość śledzia [cm]") + theme_minimal() 
+plot_length
+plot_length_hist<- ggplot(df,aes(length)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Długość", y = "Częstość") + ggtitle("Histogram długości śledzia") 
+  
+plot_length_hist
 ```
+
+## Dostępność planktonu - cfin1
+```{r,warning=FALSE}
+plot_plankton1 <- ggplot(df,aes(X,cfin1))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_plankton1 <- plot_plankton1 + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Poziomu dostępności planktonu cfin1") + theme_minimal() 
+plot_plankton1
+plot_plankton1_hist<- ggplot(df,aes(cfin1)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość", y = "Częstość") + ggtitle("Histogram dostępności cfin1") 
+  
+plot_plankton1_hist
+```
+
+## Dostępność planktonu - cfin2
+
+```{r,warning=FALSE}
+plot_plankton2 <- ggplot(df,aes(X,cfin2))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_plankton2 <- plot_plankton2 + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Poziom dostępności planktonu cfin2 od czasu") + theme_minimal() 
+plot_plankton2
+plot_plankton2_hist<- ggplot(df,aes(cfin2)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość", y = "Częstość") + ggtitle("Histogram dostępności cfin2") 
+  
+plot_plankton2_hist
+```
+
+## Dostępność planktonu - chel1
+
+```{r,warning=FALSE}
+plot_plankton3 <- ggplot(df,aes(X,chel1))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_plankton3 <- plot_plankton3 + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Poziom dostępności planktonu chel1 od czasu") + theme_minimal() 
+plot_plankton3
+plot_plankton3_hist<- ggplot(df,aes(chel1)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość", y = "Częstość") + ggtitle("Histogram dostępności chel1") 
+  
+plot_plankton3_hist
+```
+
+## Dostępność planktonu - chel2
+
+```{r,warning=FALSE}
+plot_plankton3 <- ggplot(df,aes(X,chel2))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_plankton3 <- plot_plankton3 + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Poziomu  dostępności planktonu chel2 od czasu") + theme_minimal() 
+plot_plankton3
+plot_plankton3_hist<- ggplot(df,aes(chel2)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość", y = "Częstość") + ggtitle("Histogram dostępności chel2") 
+  
+plot_plankton3_hist
+```
+
+## Dostępność planktonu - lcop1
+
+```{r,warning=FALSE}
+plot_plankton4 <- ggplot(df,aes(X,lcop1))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_plankton4 <- plot_plankton4 + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Poziom dostępności planktonu lcop1 od czasu") + theme_minimal() 
+plot_plankton4
+plot_plankton4_hist<- ggplot(df,aes(lcop1)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość", y = "Częstość") + ggtitle("Histogram dostępności lcop1") 
+  
+plot_plankton4_hist
+```
+
+## Dostępność planktonu - lcop2
+
+```{r,warning=FALSE}
+plot_plankton5 <- ggplot(df,aes(X,lcop2))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_plankton5 <- plot_plankton5 + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Poziom dostępności planktonu lcop2 od czasu") + theme_minimal() 
+plot_plankton5
+plot_plankton5_hist<- ggplot(df,aes(lcop2)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość", y = "Częstość") + ggtitle("Histogram dostępności lcop2") 
+  
+plot_plankton5_hist
+```
+
+## Natężenie połowów w regionie - fbar 
+
+```{r,warning=FALSE}
+
+plot_polow <- ggplot(df,aes(X,fbar))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_polow <- plot_polow + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Natężenie połowów w regionie od czasu - fbar") + theme_minimal() 
+plot_polow
+plot_polow_hist<- ggplot(df,aes(fbar)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Natężenie", y = "Częstość") + ggtitle("Histogram natężenie połowu w rejonie -  fbar") 
+  
+plot_polow_hist
+```
+
+## Poziom rocznego narybku - recr
+
+```{r,warning=FALSE}
+
+plot_recr <- ggplot(df,aes(X,recr))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_recr <- plot_recr + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Poziom rocznego narybku od czasu - recr") + theme_minimal() 
+plot_recr
+plot_recr_hist<- ggplot(df,aes(recr)) + geom_histogram(binwidth=160000, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Roczny narybek", y = "Częstość") + ggtitle("Histogram rocznego narybku - recr") 
+  
+plot_recr_hist
+```
+
+## Roczne natęzenie połowow - cumf
+
+```{r,warning=FALSE}
+
+plot_cumf <- ggplot(df,aes(X,cumf))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_cumf <- plot_cumf + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Łączne roczne natężenie połowów w regionie") + theme_minimal() 
+plot_cumf
+plot_cumf_hist<- ggplot(df,aes(cumf)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość", y = "Częstość") + ggtitle("Histogram łącznego rocznego natężenia połowów w regionie - cumf") 
+  
+plot_cumf_hist
+```
+
+## Liczba zlowionych ryb - totaln
+
+```{r,warning=FALSE}
+
+plot_totaln <- ggplot(df,aes(X,totaln))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_totaln <- plot_totaln + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Liczba złowionych ryb w ramach połowu") + theme_minimal() 
+plot_totaln
+plot_totaln_hist<- ggplot(df,aes(totaln)) + geom_histogram(binwidth=100000, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość złowionych ryb", y = "Częstość") + ggtitle("Histogram łącznej liczby złowionych ryb w ramach połowu - totaln") 
+  
+plot_totaln_hist
+```
+
+## Temperatura przy powiechni wody - sst
+Atrubut sst zawiera informacje o temperaturze przy powierzchni wody, oraz jest wyrażony w stopniach Celcjusza
+
+```{r,warning=FALSE}
+
+plot_sst <- ggplot(df,aes(X,sst))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_sst <- plot_sst + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Temperatura przy powierzchni wody [C]") + theme_minimal() 
+plot_sst
+plot_sst_hist<- ggplot(df,aes(sst)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Temperatura", y = "Częstość") + ggtitle("Histogram temperatury przy powierzchni wody - sst") 
+  
+plot_sst_hist
+```
+
+## Poziom zasolenia wody - sal
+Atrybut sal opisuje poziom zasolenia wody morskiej. Wartości wyrażone są w Knudsen ppt.
+```{r,warning=FALSE}
+
+plot_sal <- ggplot(df,aes(X,sal))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_sal <- plot_sal + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Poziom zasolenia wody [ppt]") + theme_minimal() 
+plot_sal
+plot_sal_hist<- ggplot(df,aes(sal)) + geom_histogram(binwidth=0.05, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Poziom zasolenia", y = "Częstość") + ggtitle("Histogram poziomu zasolenia wody - sal") 
+  
+plot_sal_hist
+```
+
+## Ostylacja północnoatlantycak - nao
+Atrybut nao przedstawia natężenie globalnej cyrkulacji powietrza i wody oceanicznej. Jest zależny od ciśnienia, temperatury, prędkości wiatru i ilości opadów.
+
+```{r,warning=FALSE}
+
+plot_nao <- ggplot(df,aes(X,nao))  + geom_line(alpha=0.3) + stat_smooth(method="auto",size = 2)
+plot_nao <- plot_nao + theme(axis.text.x=element_blank(),axis.ticks.x=element_blank()) + labs(x="Czas", y="Oscylacja północnoatlantycka") + theme_minimal() 
+plot_nao
+plot_nao_hist<- ggplot(df,aes(nao)) + geom_histogram(binwidth=0.5, color="white", fill="steelblue") +
+  theme_minimal() + labs(x = "Ilość", y = "Częstość") + ggtitle("Histogram oscylacji północnoatlantyckiej - nao") 
+  
+plot_nao_hist
+```
+
+
+
+
 
 
 
@@ -107,15 +278,14 @@ prop <- 100 * n_na_rows / nrows
 ```
 
 
-```{r, echo=T}
-for (i in 1:ncol(df)){df[is.na(df[,i]),i] <- mean(df[,i],na.rm = T)}
-```
 Brakujące wartości występują tylko w 7 atrybutach: \
 - dostępność planktonu -> cfin1, cfin2, chel1, chel2, lcop1, lcop2, \
 - temperatura przy powierzchni wody -> sst. \
 Łącznie niepełnych obserwacji mamy: `r n_na_rows`, czyli jest to `r prop` % całego zbiioru. Usunięcie takiej ilości obserwacji ze względu na braki w jednej cesze może być dużo bardziej szkodliwe niż podmienienie ich na wartości średnie lub mediane danej cechy.
 Można by spróbować, ze względu na chronologiczne ułożenie danych, obliczać średnią z wartości poprzedzającej wartość pustą oraz następującej po wartości pustej, jednak to może spowodować duże przekłamanie w danych. Średnia jest bezpieczniejszym rozwiązaniem, która nie psuje tak mocno rozkładu danych.
-
+```{r, echo=T}
+for (i in 1:ncol(df)){df[is.na(df[,i]),i] <- mean(df[,i],na.rm = T)}
+```
 
 # Korelacja między atrybutami
 ```{r}
@@ -136,13 +306,17 @@ dfPartition <- df_no_na[partition, ]
 p <- ggplot(dfPartition, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw()
 ggplotly(p)
 ```
+```{r}
+
+
+```
+
 
 # Regresor 
 Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
 
 Dane zostały podzielone na 2 zbiory: zbiór treningowy - zawierający 80 % danych, oraz zbiór testowy - zawierający 20 % 
 ```{r,echo=FALSE,warning=FALSE}
-set.seed(69)
 rfGrid <- expand.grid(mtry = 1:6)
 ctrl <- trainControl(
     method = "repeatedcv",
@@ -173,17 +347,77 @@ fit <- train(X_train,y_train,
 ggplot(fit) + ggtitle("Optymalizacja parametru mtry na podstawie miary RMSE") + theme_bw()
 
 ```
-```{r}
+
+Sprawdzenie modelu na danych testowych
+```{r testRF}
 predictions <- predict(fit, newdata = X_test)
 modelValues <- data.frame(obs = y_test, pred = predictions)
+kable(fit$results, caption = "Tabela wyników z podzbioru uczącego")
 ```
+
+
+
+
 Model regresyjny został poddany testom na danych testowych. Osiągnięto wynik w postaci miar RMSE i Rsquared:
 `r kable(defaultSummary(modelValues))`
+
+```{r reg_plot_pred}
+xs <- 1:length(y_test)
+dataf <- data.frame(xs,y_test)
+reg_plot_test <- ggplot(dataf,aes(dataf$xs,dataf$y_test)) + 
+  geom_point(alpha = 0.5, size = 0.7,color="blue") + 
+  geom_smooth(aes(y=dataf$y_test,colour = "trend"), size = 2) +
+  coord_cartesian(ylim = c(19, 31)) +
+  theme_minimal() + theme(legend.position = "none") +
+  labs(x = "Nr przykładu", y = "Długość śledzia ") + 
+  ggtitle("Wykres długości śledzia od czasu - dane testowe") 
+reg_plot_test
+```
+```{r}
+xs <- 1:length(predictions)
+dataf <- data.frame(xs,predictions)
+reg_plot_test <- ggplot(dataf,aes(dataf$xs,dataf$predictions)) + 
+  geom_point(alpha = 0.5, size = 0.7,color="blue") + 
+  geom_smooth(aes(y=dataf$predictions,colour = "trend"), size = 2) +
+  coord_cartesian(ylim = c(19, 31)) +
+  theme_minimal() + theme(legend.position = "none") +
+  labs(x = "Nr przykładu", y = "Długość śledzia ") + 
+  ggtitle("Wykres długości śledzia od czasu - predykcja") 
+reg_plot_test
+```
+
+
+# Analiza ważności atrybutów
 ```{r}
 importance <- varImp(fit, scale = FALSE)
 ggplot(importance)
 ```
 
+Z wykresu wynika, że najważniejszym atrybutem jest sst - temperatura przy powierzchni wody. Jednak kolejne 3 najważniejsze atrybuty to poziom 3 różnych rodzajów planktonu - lcop2, cfin2 oraz chel2. Jednak trzeba pamiętać o wysokiej korelacji między cfin2 a loo2, co mogło zadecydować, że oba atrybuty się znalazły jako najważniejsze. 
 
+## Zależność długości śledzia od temperatury przy powiechni
+```{r}
+df_sst_length <- df_no_na %>% select(X,sst,length)
+df_sst_length2 <- melt(df_sst_length,id.vars = 'X')
+fin_plot_tlen <- ggplot(df_sst_length2,aes(x = X, y=value)) + 
+  geom_point(size = 0.5, alpha = 0.5, color="grey") +
+  geom_smooth(size = 2) +
+  facet_grid(variable~. ,scales = 'free')  + theme_minimal() + 
+  labs(x = "Czas", y = "Temperatura / Długość") + 
+  scale_x_continuous() + 
+  ggtitle("Wykresy temperatury przy powiechni wody oraz długości śledzia od czasu") 
+fin_plot_tlen
 
-10.Analizę ważności atrybutów najlepszego znalezionego modelu regresji. Analiza ważności atrybutów powinna stanowić próbę odpowiedzi na pytanie: co sprawia, że rozmiar śledzi zaczął w pewnym momencie maleć.
+```
+```{r}
+df_planct <- df_no_na %>% select(X,lcop2,cfin2,chel2,length)
+df_planct2 <- melt(df_planct,id.vars = 'X')
+fin_plot_tlen <- ggplot(df_planct2,aes(x = X, y=value)) + 
+  geom_point(size = 0.5, alpha = 0.5, color="grey") +
+  geom_smooth(size = 2) +
+  facet_grid(variable~. ,scales = 'free')  + theme_minimal() + 
+  labs(x = "Czas", y = "Plantkon / Długość") + 
+  scale_x_continuous() + 
+  ggtitle("Wykresy ilości planktonu oraz długości śledzia od czasu") 
+fin_plot_tlen
+```
