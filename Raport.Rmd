@@ -4,12 +4,8 @@ author: "127310"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: 
   html_document:
-    keep_md: yes
-    number_sections: yes
-    toc: yes
-    toc_float:
-      collapsed: yes
-      smooth_scroll: no
+    keep_md: true
+ 
 ---
 
 ```{r setup, include=FALSE}
@@ -281,10 +277,10 @@ prop <- 100 * n_na_rows / nrows
 Brakujące wartości występują tylko w 7 atrybutach: \
 - dostępność planktonu -> cfin1, cfin2, chel1, chel2, lcop1, lcop2, \
 - temperatura przy powierzchni wody -> sst. \
-Łącznie niepełnych obserwacji mamy: `r n_na_rows`, czyli jest to `r prop` % całego zbiioru. Usunięcie takiej ilości obserwacji ze względu na braki w jednej cesze może być dużo bardziej szkodliwe niż podmienienie ich na wartości średnie lub mediane danej cechy.
-Można by spróbować, ze względu na chronologiczne ułożenie danych, obliczać średnią z wartości poprzedzającej wartość pustą oraz następującej po wartości pustej, jednak to może spowodować duże przekłamanie w danych. Średnia jest bezpieczniejszym rozwiązaniem, która nie psuje tak mocno rozkładu danych.
+Łącznie niepełnych obserwacji mamy: `r n_na_rows`, czyli jest to `r prop` % całego zbiioru.
+Jest to znacząca część zbioru. Jednak zakładamy, że zbiór danych zawiera chronologiczne ułożone dane, dlatego proste operacje na wartościach pustych, takie jak średnia lub mediana z danego atrybutu, mogą całkowicie przekłamać nam rozkład danych. Ze względu na ilość tych danych usunięcie ich może róWnież spowodować różne skutki. Jednak dzięki temu można uznać, że operacje która została dokonana na wartościach pustych, miała jakikolwiek pozytywny lub negatywny na dalsze przetwarzanie. 
 ```{r, echo=T}
-for (i in 1:ncol(df)){df[is.na(df[,i]),i] <- mean(df[,i],na.rm = T)}
+df <- df_no_na
 ```
 
 # Korelacja między atrybutami
@@ -393,7 +389,7 @@ importance <- varImp(fit, scale = FALSE)
 ggplot(importance)
 ```
 
-Z wykresu wynika, że najważniejszym atrybutem jest sst - temperatura przy powierzchni wody. Jednak kolejne 3 najważniejsze atrybuty to poziom 3 różnych rodzajów planktonu - lcop2, cfin2 oraz chel2. Jednak trzeba pamiętać o wysokiej korelacji między cfin2 a loo2, co mogło zadecydować, że oba atrybuty się znalazły jako najważniejsze. 
+Z wykresu wynika, że najważniejszym atrybutem jest sst - temperatura przy powierzchni wody. Jego dominacja nad pozostałymi atrybutmami jest dość znacząca. Na drugim miejscu znajduje się totaln oraz lcop2, czyli liczość połowów oraz dostępność planktonu - zagęszczenie widłonogów gat. 2. Co ciekawe żadne z tych atrybutów nie miały znacząjek korelacji między sobą.
 
 ## Zależność długości śledzia od temperatury przy powiechni
 ```{r}
@@ -410,14 +406,20 @@ fin_plot_tlen
 
 ```
 ```{r}
-df_planct <- df_no_na %>% select(X,lcop2,cfin2,chel2,length)
+df_planct <- df_no_na %>% select(X,lcop2,totaln,length)
 df_planct2 <- melt(df_planct,id.vars = 'X')
 fin_plot_tlen <- ggplot(df_planct2,aes(x = X, y=value)) + 
   geom_point(size = 0.5, alpha = 0.5, color="grey") +
   geom_smooth(size = 2) +
   facet_grid(variable~. ,scales = 'free')  + theme_minimal() + 
-  labs(x = "Czas", y = "Plantkon / Długość") + 
+  labs(x = "Czas", y = "Plantkon, połowy / Długość") + 
   scale_x_continuous() + 
-  ggtitle("Wykresy ilości planktonu oraz długości śledzia od czasu") 
+  ggtitle("Wykresy ilości planktonu, połowów oraz długości śledzia od czasu") 
 fin_plot_tlen
 ```
+
+# Wnioski
+Na podstawie wykonanej analizy można stwierdzić, że największy wpływ na pomniejszenie się śledzi ma temperatura powietrza przy powiechni wody. Następnym czynnikem jest ilość połowów oraz liczba planktonu. Są to według koleracji niezależne od siebie atrybuty, ale może gdyby przeprowadzić dokładniejsze badania na ich temat wynik byłby inny. Przez ilość niepełnych obserwacji wyniki badań mogą być w pewnym stopniu przekłamane. Ciekawym rozwiązaniem mogło by być, stworzenie klasyfikatora, który uzupełnia brakujące dane, a następnie ponowna próba przeprowadzenia takich badań. 
+
+# Interaktywny Wykres
+W celu wygenerowania interaktywnego wykresu za pomocą biblioteki shiny, dane z kolumny lenght zostały pogrupowane po 50 kolejnych elementów, a z takich grup policzona średnia. Wykonano to by "suwak" na wykresie nie był za długi. Niestety biblioteka shiny nie daje możliwości na wykorzystanie jej w statycznym pliku raportu, dlatego kod do wykonania takiego wykresu znajduje się w pliku "library.R".
