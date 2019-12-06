@@ -302,7 +302,7 @@ Nao jest to Oscylacja Północnoatlantycka, która jest zjawiskiem meteorologicz
 partition <- createDataPartition(y=df_no_na$length, p=.05, list=FALSE)
 dfPartition <- df_no_na[partition, ]
 p <- ggplot(dfPartition, aes(x=X, y=length)) + geom_point() + geom_smooth() + theme_bw()
-ggplotly(p)
+p
 ```
 ```{r}
 
