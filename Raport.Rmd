@@ -280,7 +280,7 @@ Brakujące wartości występują tylko w 7 atrybutach: \
 - dostępność planktonu -> cfin1, cfin2, chel1, chel2, lcop1, lcop2, \
 - temperatura przy powierzchni wody -> sst. \
 Łącznie niepełnych obserwacji mamy: `r n_na_rows`, czyli jest to `r prop` % całego zbiioru.
-Jest to znacząca część zbioru. Jednak zakładamy, że zbiór danych zawiera chronologiczne ułożone dane, dlatego proste operacje na wartościach pustych, takie jak średnia lub mediana z danego atrybutu, mogą całkowicie przekłamać nam rozkład danych. Ze względu na ilość tych danych usunięcie ich może róWnież spowodować różne skutki. Jednak dzięki temu można uznać, że operacje która została dokonana na wartościach pustych, miała jakikolwiek pozytywny lub negatywny na dalsze przetwarzanie. 
+Jest to znacząca część zbioru. Jednak zakładamy, że zbiór danych zawiera chronologiczne ułożone dane, dlatego proste operacje na wartościach pustych, takie jak średnia lub mediana z danego atrybutu, mogą całkowicie przekłamać nam rozkład danych. Ze względu na ilość tych danych usunięcie ich może róWnież spowodować różne skutki. Jednak wydaje się to najłatwiejszą i najbezpieczniejszą opcją, ponieważ jakość danych się nie pogorszy przez nasze niepoprawne uzupełnianie ich.
 ```{r, echo=T}
 df <- df_no_na
 ```
