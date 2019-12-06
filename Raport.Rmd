@@ -311,7 +311,7 @@ p
 
 
 # Regresor 
-Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
+Do stworzenia regresora została wykorzystana metoda Random Forest, jako metryka błedu został wykorzystany RMSE - czyli błąd średniokwadratowy. Ilosć drzew została ustawiona na podstawie eksperymentów na 20.
 
 Dane zostały podzielone na 2 zbiory: zbiór treningowy - zawierający 80 % danych, oraz zbiór testowy - zawierający 20 % 
 ```{r,echo=FALSE,warning=FALSE}
@@ -333,7 +333,7 @@ y_train = training$length
 X_test = select(testing, -length)
 y_test = testing$length
 ```
-COS O MODELU
+
 ```{r}
 fit <- train(X_train,y_train,
             method = 'rf',
@@ -384,6 +384,7 @@ reg_plot_test <- ggplot(dataf,aes(dataf$xs,dataf$predictions)) +
 reg_plot_test
 ```
 
+Model osiąga bardzo zbliżone wyniki do rzeczywistych.
 
 # Analiza ważności atrybutów
 ```{r}
@@ -421,7 +422,7 @@ fin_plot_tlen
 ```
 
 # Wnioski
-Na podstawie wykonanej analizy można stwierdzić, że największy wpływ na pomniejszenie się śledzi ma temperatura powietrza przy powiechni wody. Następnym czynnikem jest ilość połowów oraz liczba planktonu. Są to według koleracji niezależne od siebie atrybuty, ale może gdyby przeprowadzić dokładniejsze badania na ich temat wynik byłby inny. Przez ilość niepełnych obserwacji wyniki badań mogą być w pewnym stopniu przekłamane. Ciekawym rozwiązaniem mogło by być, stworzenie klasyfikatora, który uzupełnia brakujące dane, a następnie ponowna próba przeprowadzenia takich badań. 
+Na podstawie wykonanej analizy można stwierdzić, że największy wpływ na pomniejszenie się śledzi ma temperatura powietrza przy powiechni wody. Następnym czynnikem jest ilość połowów oraz liczba planktonu. Są to według koleracji niezależne od siebie atrybuty, ale może gdyby przeprowadzić dokładniejsze badania na ich temat wynik byłby inny(Ciekawy jaki wpływ na te parametry ma działalność człowieka na środowisko). Przez ilość niepełnych obserwacji wyniki badań mogą być w pewnym stopniu przekłamane. Ciekawym rozwiązaniem mogło by być, stworzenie klasyfikatora, który uzupełnia brakujące dane, a następnie ponowna próba przeprowadzenia takich badań. 
 
 # Interaktywny Wykres
 W celu wygenerowania interaktywnego wykresu za pomocą biblioteki shiny, dane z kolumny lenght zostały pogrupowane po 50 kolejnych elementów, a z takich grup policzona średnia. Wykonano to by "suwak" na wykresie nie był za długi. Niestety biblioteka shiny nie daje możliwości na wykorzystanie jej w statycznym pliku raportu, dlatego kod do wykonania takiego wykresu znajduje się w pliku "library.R".

@@ -448,7 +448,7 @@ Brakujące wartości występują tylko w 7 atrybutach: \
 - dostępność planktonu -> cfin1, cfin2, chel1, chel2, lcop1, lcop2, \
 - temperatura przy powierzchni wody -> sst. \
 Łącznie niepełnych obserwacji mamy: 10094, czyli jest to 19.1966833 % całego zbiioru.
-Jest to znacząca część zbioru. Jednak zakładamy, że zbiór danych zawiera chronologiczne ułożone dane, dlatego proste operacje na wartościach pustych, takie jak średnia lub mediana z danego atrybutu, mogą całkowicie przekłamać nam rozkład danych. Ze względu na ilość tych danych usunięcie ich może róWnież spowodować różne skutki. Jednak dzięki temu można uznać, że operacje która została dokonana na wartościach pustych, miała jakikolwiek pozytywny lub negatywny na dalsze przetwarzanie. 
+Jest to znacząca część zbioru. Jednak zakładamy, że zbiór danych zawiera chronologiczne ułożone dane, dlatego proste operacje na wartościach pustych, takie jak średnia lub mediana z danego atrybutu, mogą całkowicie przekłamać nam rozkład danych. Ze względu na ilość tych danych usunięcie ich może róWnież spowodować różne skutki. Jednak wydaje się to najłatwiejszą i najbezpieczniejszą opcją, ponieważ jakość danych się nie pogorszy przez nasze niepoprawne uzupełnianie ich.
 
 ```r
 df <- df_no_na
@@ -487,7 +487,7 @@ p
 
 
 # Regresor 
-Sekcję próbującą stworzyć regresor przewidujący rozmiar śledzia (w tej sekcji należy wykorzystać wiedzę z pozostałych punktów oraz wykonać dodatkowe czynności, które mogą poprawić trafność predykcji); dobór parametrów modelu oraz oszacowanie jego skuteczności powinny zostać wykonane za pomocą techniki podziału zbioru na dane uczące, walidujące i testowe; trafność regresji powinna zostać oszacowana na podstawie miar R2 i RMSE.
+Do stworzenia regresora została wykorzystana metoda Random Forest, jako metryka błedu został wykorzystany RMSE - czyli błąd średniokwadratowy. Ilosć drzew została ustawiona na podstawie eksperymentów na 20.
 
 Dane zostały podzielone na 2 zbiory: zbiór treningowy - zawierający 80 % danych, oraz zbiór testowy - zawierający 20 % 
 
@@ -504,7 +504,7 @@ y_train = training$length
 X_test = select(testing, -length)
 y_test = testing$length
 ```
-COS O MODELU
+
 
 ```r
 fit <- train(X_train,y_train,
@@ -593,6 +593,7 @@ reg_plot_test
 
 ![](Raport_files/figure-html/unnamed-chunk-27-1.png)<!-- -->
 
+Model osiąga bardzo zbliżone wyniki do rzeczywistych.
 
 # Analiza ważności atrybutów
 
@@ -646,7 +647,7 @@ fin_plot_tlen
 ![](Raport_files/figure-html/unnamed-chunk-30-1.png)<!-- -->
 
 # Wnioski
-Na podstawie wykonanej analizy można stwierdzić, że największy wpływ na pomniejszenie się śledzi ma temperatura powietrza przy powiechni wody. Następnym czynnikem jest ilość połowów oraz liczba planktonu. Są to według koleracji niezależne od siebie atrybuty, ale może gdyby przeprowadzić dokładniejsze badania na ich temat wynik byłby inny. Przez ilość niepełnych obserwacji wyniki badań mogą być w pewnym stopniu przekłamane. Ciekawym rozwiązaniem mogło by być, stworzenie klasyfikatora, który uzupełnia brakujące dane, a następnie ponowna próba przeprowadzenia takich badań. 
+Na podstawie wykonanej analizy można stwierdzić, że największy wpływ na pomniejszenie się śledzi ma temperatura powietrza przy powiechni wody. Następnym czynnikem jest ilość połowów oraz liczba planktonu. Są to według koleracji niezależne od siebie atrybuty, ale może gdyby przeprowadzić dokładniejsze badania na ich temat wynik byłby inny(Ciekawy jaki wpływ na te parametry ma działalność człowieka na środowisko). Przez ilość niepełnych obserwacji wyniki badań mogą być w pewnym stopniu przekłamane. Ciekawym rozwiązaniem mogło by być, stworzenie klasyfikatora, który uzupełnia brakujące dane, a następnie ponowna próba przeprowadzenia takich badań. 
 
 # Interaktywny Wykres
 W celu wygenerowania interaktywnego wykresu za pomocą biblioteki shiny, dane z kolumny lenght zostały pogrupowane po 50 kolejnych elementów, a z takich grup policzona średnia. Wykonano to by "suwak" na wykresie nie był za długi. Niestety biblioteka shiny nie daje możliwości na wykorzystanie jej w statycznym pliku raportu, dlatego kod do wykonania takiego wykresu znajduje się w pliku "library.R".
